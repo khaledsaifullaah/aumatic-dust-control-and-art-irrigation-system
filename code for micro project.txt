@@ -1,0 +1,111 @@
+Code for dust sensor:
+
+
+
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);//led pin
+
+int sensePin = A5;
+int ledPin = 8;
+int Tsampling = 280;
+int Tdelta = 40;
+int Tsleep = 9680;
+ 
+float outVo = 0;
+float sigVolt = 0;
+float dustLevel = 0;
+ 
+void setup(){
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+  pinMode(ledPin,OUTPUT);
+}
+ void loop(){
+  
+  digitalWrite(ledPin,LOW); 
+  delayMicroseconds(Tsampling);
+ 
+  outVo = analogRead(sensePin); 
+ 
+  delayMicroseconds(Tdelta);
+  digitalWrite(ledPin,HIGH); 
+  delayMicroseconds(Tsleep);
+ 
+  sigVolt = outVo * (3.3 / 1024);//show voltage
+ 
+  dustLevel = 0.17 * sigVolt - 0.1;//show dust level(DustDensity)
+ 
+  Serial.print("Measured Signal Value (0-1023): ");//show the voltage
+  Serial.print(outVo);
+ 
+  Serial.print("   Voltage: ");
+  Serial.print(sigVolt);
+lcd.setCursor(0,0);
+  lcd.print("Voltage ");
+  lcd.print(sigVolt);
+ 
+  Serial.print("   Dust Density Level: ");
+  Serial.println(dustLevel);
+  lcd.setCursor(0,1);
+  lcd.print("DustDensity ");
+  lcd.print(dustLevel);
+  delay(1000);
+  if (dustLevel<0.1)
+  {
+    delay(1000);
+    digitalWrite(3, HIGH);//pump work
+  }
+ 
+  else
+  {
+    delay(1000);
+    digitalWrite (3,LOW);  //pump off
+  }
+ 
+  delay (1000);
+}
+
+
+}
+
+
+
+
+
+ 
+Moisture Sensor code:
+
+
+
+
+
+int sensor_pin= A0;
+int output_value;
+void setup(){
+ pinMode(3, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Reading from the Moisture sensor…");
+  delay(2000);
+}
+void loop()
+{
+  output_value= analogRead (sensor_pin);
+  output_value= map (output_value,550,10,0,100);
+  Serial.print("Moisture:");
+  Serial.print(output_value);
+  Serial.println("%");
+  if (output_value<0)
+  {
+    delay(1000);
+    digitalWrite(3, HIGH);//pump work
+  }
+  else
+  {
+    delay(1000);
+    digitalWrite (3,LOW);  //pump off
+  }
+ 
+  delay (1000);
+}
+
